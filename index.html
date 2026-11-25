@@ -1,0 +1,760 @@
+<!doctype html>
+<html lang="id">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E6B63">
+<title>Kuis Asesor Kompetensi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: satu kolom kerja ala lembar Buku Kerja Asesor — kepala formulir, kartu soal, navigator nomor soal di bawah */
+:root{
+  --bg:#EEF2F1; --surface:#FFFFFF; --sunk:#E3E9E7; --ink:#14212A; --muted:#566570; --line:#CDD6D3;
+  --accent:#0E6B63; --accent-ink:#FFFFFF; --accent-soft:#D5ECE8;
+  --ok:#1C7A3A; --ok-soft:#DDF1E3; --bad:#B3261E; --bad-soft:#F8E0DD; --pending:#9AA7AE;
+  --f-display:"Archivo","Segoe UI",system-ui,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1417; --surface:#162026; --sunk:#1D2930; --ink:#E4ECEA; --muted:#93A3AA; --line:#2B3940;
+  --accent:#4DB6A9; --accent-ink:#06201C; --accent-soft:#173A36;
+  --ok:#5BC97E; --ok-soft:#163323; --bad:#F2766B; --bad-soft:#3A1C1A; --pending:#56656C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1417; --surface:#162026; --sunk:#1D2930; --ink:#E4ECEA; --muted:#93A3AA; --line:#2B3940;
+  --accent:#4DB6A9; --accent-ink:#06201C; --accent-soft:#173A36;
+  --ok:#5BC97E; --ok-soft:#163323; --bad:#F2766B; --bad-soft:#3A1C1A; --pending:#56656C; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+.mono{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.04em}
+header.head{display:grid;grid-template-columns:1fr auto;gap:12px 20px;align-items:end;border-bottom:2px solid var(--ink);padding-bottom:14px}
+.head .code{color:var(--muted);text-transform:uppercase}
+.head h1{font-family:var(--f-display);font-weight:800;font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.05;margin:4px 0 0;text-wrap:balance;letter-spacing:-.01em}
+.head p{margin:6px 0 0;color:var(--muted);max-width:60ch}
+.tally{display:flex;gap:14px;font-variant-numeric:tabular-nums;text-align:right}
+.tally div{display:flex;flex-direction:column}
+.tally b{font-family:var(--f-display);font-size:1.5rem;line-height:1}
+.tally span{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tally .k b{color:var(--ok)} .tally .bk b{color:var(--bad)}
+
+.settings{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:flex;flex-wrap:wrap;gap:14px 22px;align-items:flex-end}
+.settings fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.settings legend{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;padding:0;margin-bottom:6px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--ink);padding:7px 12px;font:600 .9rem var(--f-body);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:5px 11px;font:600 .82rem var(--f-body);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.chip small{font-family:var(--f-mono);color:var(--muted);margin-left:4px}
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:5px;padding:9px 16px;font:700 .92rem var(--f-body);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.accent{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.settings .apply{margin-left:auto}
+
+.progress{height:6px;background:var(--sunk);border-radius:3px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 22px 20px;display:flex;flex-direction:column;gap:16px}
+.card .meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted)}
+.card .meta .topic{color:var(--accent);font-weight:700}
+.qtext{font-family:var(--f-display);font-weight:600;font-size:clamp(1.12rem,2.6vw,1.32rem);line-height:1.4;margin:0;text-wrap:pretty}
+.opts{display:flex;flex-direction:column;gap:9px;list-style:none;margin:0;padding:0}
+.opt{width:100%;display:grid;grid-template-columns:2rem 1fr auto;align-items:start;gap:10px;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:11px 13px;font:400 1rem/1.45 var(--f-body);cursor:pointer;transition:border-color .12s,background .12s}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt .let{font-family:var(--f-mono);font-weight:700;width:1.7rem;height:1.7rem;border:1px solid var(--line);border-radius:4px;display:grid;place-items:center;font-size:.85rem;background:var(--surface)}
+.opt .mark{font-family:var(--f-mono);font-weight:700;font-size:.72rem;letter-spacing:.06em;align-self:center}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.opt.sel .let{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.right .let{background:var(--ok);color:var(--surface);border-color:var(--ok)}
+.opt.right .mark{color:var(--ok)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.wrong .let{background:var(--bad);color:var(--surface);border-color:var(--bad)}
+.opt.wrong .mark{color:var(--bad)}
+.opt:disabled{cursor:default}
+.expl{border-left:3px solid var(--accent);background:var(--sunk);padding:10px 14px;border-radius:0 5px 5px 0;font-size:.95rem}
+.expl b{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:2px}
+.expl.ok b{color:var(--ok)} .expl.bad b{color:var(--bad)}
+.nav{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap}
+.nav .r{display:flex;gap:8px}
+.hint{color:var(--muted);font-size:.8rem}
+
+.grid-wrap{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.grid-wrap h2{font:700 .72rem var(--f-body);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:0;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.legend{display:flex;gap:12px;font-weight:600;text-transform:none;letter-spacing:0}
+.legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:0;background:var(--c)}
+.numgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(36px,1fr));gap:5px}
+.num{font:700 .78rem var(--f-mono);font-variant-numeric:tabular-nums;height:32px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;cursor:pointer;padding:0}
+.num.done{background:var(--accent-soft);border-color:var(--accent)}
+.num.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.num.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.num.cur{outline:2px solid var(--ink);outline-offset:1px}
+
+.result{display:flex;flex-direction:column;gap:18px}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:18px 24px;align-items:center}
+.stamp{font-family:var(--f-display);font-weight:800;font-size:1.05rem;letter-spacing:.12em;text-transform:uppercase;border:3px solid currentColor;border-radius:6px;padding:10px 14px;transform:rotate(-4deg);text-align:center;line-height:1.1}
+.stamp small{display:block;font:700 .62rem var(--f-mono);letter-spacing:.08em;margin-top:4px}
+.stamp.k{color:var(--ok)} .stamp.bk{color:var(--bad)}
+.big{font-family:var(--f-display);font-weight:800;font-size:clamp(2.2rem,7vw,3.2rem);line-height:1;font-variant-numeric:tabular-nums}
+.big span{font-size:.45em;color:var(--muted);font-weight:700}
+.note{color:var(--muted);font-size:.9rem;max-width:62ch;margin:6px 0 0}
+table.bytopic{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.95rem}
+.bytopic th,.bytopic td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left}
+.bytopic th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.bytopic td.n{text-align:right;white-space:nowrap}
+.bar{height:8px;background:var(--sunk);border-radius:4px;overflow:hidden;min-width:60px}
+.bar i{display:block;height:100%;background:var(--ok)}
+.tablewrap{overflow-x:auto}
+.wronglist{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.wronglist li{border:1px solid var(--line);border-radius:5px;padding:11px 13px;background:var(--bg);font-size:.95rem}
+.wronglist .q{font-weight:600;margin-bottom:4px}
+.wronglist .a{color:var(--ok);font-weight:600}
+.wronglist .y{color:var(--bad)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+h3.sec{font:700 .78rem var(--f-body);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:6px 0 0}
+/* ===== Tambahan: kenyamanan layar sentuh & efek suara ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+button{touch-action:manipulation}
+.qtext,.opt,.wronglist li,.expl{overflow-wrap:anywhere}
+.head-side{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.snd{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;min-height:36px;font:700 .8rem var(--f-body);cursor:pointer}
+.snd[aria-pressed="false"]{color:var(--muted)}
+.snd svg{width:18px;height:18px;flex:none}
+.snd .off{display:none}
+.snd[aria-pressed="false"] .on{display:none}
+.snd[aria-pressed="false"] .off{display:inline}
+.settings-toggle{display:none}
+/* Status "jawaban dikunci" sebelum hasil ditampilkan */
+.opt.lock{border-color:#E08A00;background:rgba(224,138,0,.16);animation:lockpulse .45s ease-in-out infinite alternate}
+.opt.lock .let{background:#E08A00;color:#1A1000;border-color:#E08A00}
+@keyframes lockpulse{from{box-shadow:0 0 0 0 rgba(224,138,0,.0)}to{box-shadow:0 0 0 4px rgba(224,138,0,.35)}}
+.opt.right.reveal{animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.025)}100%{transform:scale(1)}}
+.card.shake{animation:shake .35s ease-in-out}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media (pointer:coarse){ .hint.kbd{display:none} }
+
+@media (max-width:560px){
+  header.head{grid-template-columns:1fr;gap:10px}
+  .head .code{font-size:.68rem}
+  .head p{font-size:.92rem}
+  .head-side{flex-direction:row;align-items:center;justify-content:space-between}
+  .snd{min-height:44px;padding:8px 14px}
+  .tally{text-align:left}
+  .wrap{padding-top:16px;gap:14px}
+  .card{padding:16px 14px;gap:14px}
+  .card .meta{font-size:.7rem}
+  .qtext{font-size:1.1rem;line-height:1.45}
+  .opt{grid-template-columns:2rem 1fr;min-height:52px;padding:12px;font-size:1rem;gap:8px 10px}
+  .opt .let{width:1.9rem;height:1.9rem}
+  .opt .mark{grid-column:2;align-self:start}
+  .opt .mark:empty{display:none}
+  /* Pengaturan dilipat di HP agar soal langsung terlihat */
+  .settings-toggle{display:flex;justify-content:space-between;align-items:center;width:100%;min-height:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:8px 14px;font:700 .9rem var(--f-body);cursor:pointer}
+  .settings-toggle::after{content:"▾";transition:transform .2s}
+  .settings-toggle[aria-expanded="true"]::after{transform:rotate(180deg)}
+  .settings.collapsed{display:none}
+  .settings{padding:14px;gap:14px}
+  .settings fieldset{width:100%}
+  .seg{display:flex;width:100%}
+  .seg button{flex:1;min-height:44px;padding:8px 6px}
+  .chip{min-height:40px;padding:8px 12px}
+  .settings .apply{margin-left:0;width:100%}
+  .btn{min-height:48px;padding:10px 14px;font-size:.95rem}
+  /* Navigasi soal menempel di bawah layar — mudah dijangkau jempol */
+  .nav{position:sticky;bottom:0;z-index:5;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 -14px -16px;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 14px -10px rgba(0,0,0,.35);border-radius:0 0 6px 6px}
+  .nav .r{display:contents}
+  .nav #bPrev{order:1}
+  .nav #bNext{order:2}
+  .nav #bFin,.nav #bRes{order:3;grid-column:1/-1;min-height:44px}
+  .progress{position:sticky;top:0;z-index:6;height:5px;border-radius:0;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)))}
+  .numgrid{grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px}
+  .num{height:44px;font-size:.85rem}
+  .legend{flex-wrap:wrap;gap:8px 12px}
+  .verdict{grid-template-columns:1fr}
+  .stamp{justify-self:start}
+  .actions .btn{flex:1 1 100%}
+  .bytopic{font-size:.88rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <div class="code mono">Pelatihan Asesor Kompetensi · BNSP · Latihan Mandiri</div>
+      <h1>Kuis Asesor Kompetensi</h1>
+      <p>100 soal pilihan ganda: sistem sertifikasi, prinsip asesmen & aturan bukti, dimensi kompetensi, MAPA, instrumen FR.IA, melaksanakan asesmen, dan MKVA.</p>
+    </div>
+    <div class="head-side">
+      <button type="button" class="snd" id="sndBtn" aria-pressed="true" title="Efek suara on/off">
+        <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg>
+        <span id="sndLbl">Suara on</span>
+      </button>
+      <div class="tally" aria-live="polite">
+        <div class="k"><b id="tRight">0</b><span>Benar</span></div>
+        <div class="bk"><b id="tWrong">0</b><span>Salah</span></div>
+        <div><b id="tDone">0</b><span id="tTotal">/ 100</span></div>
+      </div>
+    </div>
+  </header>
+
+  <button type="button" class="settings-toggle" id="setToggle" aria-expanded="false" aria-controls="settingsBox">Pengaturan kuis (mode, jumlah, materi)</button>
+  <section class="settings collapsed" id="settingsBox" aria-label="Pengaturan kuis">
+    <fieldset>
+      <legend>Mode</legend>
+      <div class="seg" id="modeSeg">
+        <button type="button" id="mLatihan" data-mode="latihan" aria-pressed="true">Latihan</button>
+        <button type="button" id="mUjian" data-mode="ujian" aria-pressed="false">Ujian</button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Jumlah soal</legend>
+      <div class="seg" id="countSeg">
+        <button type="button" id="c10" data-n="10" aria-pressed="false">10</button>
+        <button type="button" id="c25" data-n="25" aria-pressed="false">25</button>
+        <button type="button" id="c50" data-n="50" aria-pressed="false">50</button>
+        <button type="button" id="cAll" data-n="0" aria-pressed="true">Semua</button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Urutan</legend>
+      <div class="seg" id="orderSeg">
+        <button type="button" id="oUrut" data-sh="0" aria-pressed="true">Berurutan</button>
+        <button type="button" id="oAcak" data-sh="1" aria-pressed="false">Acak</button>
+      </div>
+    </fieldset>
+    <fieldset style="flex-basis:100%">
+      <legend>Materi</legend>
+      <div class="chips" id="topicChips"></div>
+    </fieldset>
+    <button type="button" class="btn accent apply" id="btnStart">Mulai ulang dengan pengaturan ini</button>
+  </section>
+
+  <div class="progress" aria-hidden="true"><i id="prog"></i></div>
+
+  <main id="main"></main>
+
+  <section class="grid-wrap" id="gridWrap" aria-label="Navigasi nomor soal">
+    <h2><span>Nomor soal</span>
+      <span class="legend"><span style="--c:var(--bg);">Belum</span><span style="--c:var(--accent)" id="lgDone">Dijawab</span><span style="--c:var(--ok)">Benar</span><span style="--c:var(--bad)">Salah</span></span>
+    </h2>
+    <div class="numgrid" id="numgrid"></div>
+  </section>
+</div>
+
+<script>
+/* Data soal: [kodeMateri, pertanyaan, [opsi benar, pengecoh, pengecoh, pengecoh], penjelasan]
+   Opsi pertama selalu kunci jawaban; urutan opsi diacak saat tampil. */
+const TOPICS = {
+  S:"Sistem Sertifikasi", P:"Prinsip & Aturan Bukti", D:"Standar & Dimensi Kompetensi",
+  M:"MAPA", I:"Instrumen Asesmen", A:"Melaksanakan Asesmen", V:"MKVA"
+};
+const Q = [
+["S","Lembaga independen yang bertugas melaksanakan sertifikasi kompetensi kerja dan dapat memberikan lisensi kepada LSP adalah…",["BNSP (Badan Nasional Sertifikasi Profesi)","KAN (Komite Akreditasi Nasional)","Dinas Tenaga Kerja provinsi","Direktorat Jenderal Pendidikan Vokasi"],"BNSP bertugas melaksanakan sertifikasi kompetensi kerja dan memberikan lisensi kepada LSP yang memenuhi persyaratan (PP 10 Tahun 2018)."],
+["S","Dalam melaksanakan tugasnya, BNSP bertanggung jawab kepada…",["Presiden","Menteri Ketenagakerjaan","DPR RI","Menteri Pendidikan"],"BNSP adalah lembaga independen yang bertanggung jawab kepada Presiden."],
+["S","Pembentukan BNSP merupakan amanat dari undang-undang…",["UU No. 13 Tahun 2003 tentang Ketenagakerjaan","UU No. 20 Tahun 2003 tentang Sistem Pendidikan Nasional","UU No. 12 Tahun 2012 tentang Pendidikan Tinggi","UU No. 14 Tahun 2005 tentang Guru dan Dosen"],"Pasal 18 UU 13/2003 menyatakan bahwa untuk melaksanakan sertifikasi kompetensi kerja dibentuk badan nasional sertifikasi profesi yang independen."],
+["S","Peraturan pemerintah yang saat ini mengatur tentang BNSP adalah…",["PP No. 10 Tahun 2018","PP No. 31 Tahun 2006","PP No. 23 Tahun 2004, yang masih berlaku tanpa perubahan","Perpres No. 8 Tahun 2012"],"PP 10/2018 tentang BNSP menggantikan PP 23/2004. PP 31/2006 mengatur Sistem Pelatihan Kerja Nasional, Perpres 8/2012 mengatur KKNI."],
+["S","Sistem Pelatihan Kerja Nasional (Sislatkernas) diatur dalam…",["PP No. 31 Tahun 2006","PP No. 10 Tahun 2018","UU No. 20 Tahun 2003","Perpres No. 8 Tahun 2012"],"Sislatkernas diatur dalam PP 31/2006; di dalamnya standar kompetensi, pelatihan berbasis kompetensi, dan sertifikasi saling terkait."],
+["S","LSP yang dibentuk untuk memastikan kompetensi SDM lembaga induknya beserta SDM jejaring kerjanya (pemasok/mitra) disebut…",["LSP Pihak Kedua (P2)","LSP Pihak Pertama (P1)","LSP Pihak Ketiga (P3)","TUK Mandiri"],"LSP P2 menyertifikasi SDM lembaga induk dan SDM jejaring kerjanya. LSP P2 Maarif Jateng termasuk jenis ini."],
+["S","LSP Pihak Ketiga (P3) dibentuk untuk…",["Menyertifikasi kompetensi kerja untuk sektor dan/atau profesi tertentu bagi masyarakat luas","Menyertifikasi peserta didik di satu sekolah saja","Menyertifikasi karyawan internal satu perusahaan saja","Menyelenggarakan pelatihan kerja berbasis kompetensi"],"LSP P3 umumnya dibentuk oleh asosiasi industri/profesi untuk sertifikasi pada sektor atau profesi tertentu, terbuka untuk umum."],
+["S","LSP P1 pada lembaga pendidikan (VET) memiliki ruang lingkup sertifikasi terhadap…",["Peserta didiknya yang mengikuti pendidikan berbasis kompetensi","Seluruh masyarakat di wilayah provinsi","Pemasok dan mitra kerja lembaga induk","Asesor dari LSP lain"],"LSP P1 pendidikan memastikan dan memelihara kompetensi peserta didiknya (dan SDM mitra lembaga induknya sesuai pedoman)."],
+["S","Prinsip dasar pengembangan sistem sertifikasi yang berarti “tidak terjadi konflik kepentingan” adalah…",["Obyektif","Terukur","Tertelusuri","Keberterimaan"],"Terukur = mengacu standar; Obyektif = tidak ada konflik kepentingan; Tertelusuri = seluruh proses terdokumentasi dan terkendali; Keberterimaan = diterima pemangku kepentingan."],
+["S","Prinsip “keseluruhan proses terdokumentasi dan terkendali” dalam sistem sertifikasi disebut…",["Tertelusuri","Obyektif","Acceptable","Terukur"],"Tertelusuri berarti setiap proses sertifikasi dapat ditelusuri melalui dokumen dan rekaman yang terkendali."],
+["S","Standar internasional yang menjadi acuan persyaratan lembaga sertifikasi personel (seperti LSP) adalah…",["ISO/IEC 17024","ISO 9001","ISO/IEC 17025","ISO/IEC 27001"],"ISO/IEC 17024 mengatur persyaratan umum lembaga sertifikasi personel. Pedoman BNSP untuk LSP mengacu pada standar ini."],
+["S","Tempat kerja atau tempat lain yang memenuhi persyaratan untuk digunakan sebagai tempat pelaksanaan uji kompetensi disebut…",["TUK (Tempat Uji Kompetensi)","LPK (Lembaga Pelatihan Kerja)","BLK (Balai Latihan Kerja)","Sekretariat LSP"],"TUK diverifikasi oleh LSP dan harus memenuhi persyaratan sarana, prasarana, dan K3 sesuai skema."],
+["S","Kemasan skema sertifikasi yang dikenal dalam sistem sertifikasi BNSP adalah…",["KKNI, Okupasi Nasional, dan Klaster","Diploma, Sarjana, dan Magister","Dasar, Menengah, dan Lanjut","Tunggal, Ganda, dan Majemuk"],"Skema sertifikasi dapat dikemas sebagai kualifikasi KKNI, okupasi nasional, atau klaster (sekelompok unit untuk kebutuhan tertentu)."],
+["S","Kerangka Kualifikasi Nasional Indonesia (KKNI) terdiri atas berapa jenjang kualifikasi?",["9 jenjang","6 jenjang","8 jenjang","12 jenjang"],"KKNI (Perpres 8/2012) memiliki 9 jenjang; jenjang 1 terendah dan jenjang 9 tertinggi. Skema TKJ yang dilatihkan adalah KKNI Level II."],
+["S","Perbedaan sertifikat kompetensi dengan sertifikat pelatihan yang benar adalah…",["Sertifikat kompetensi berlaku selama pemegangnya masih kompeten (ada masa berlaku dan survailen), sertifikat pelatihan umumnya berlaku selamanya","Sertifikat kompetensi diterbitkan lembaga pelatihan, sertifikat pelatihan diterbitkan LSP","Keduanya sama-sama berlaku seumur hidup","Sertifikat pelatihan wajib diperpanjang setiap tahun"],"Sertifikat kompetensi diterbitkan LSP dan berlaku selama masih kompeten; sertifikat pelatihan (certificate of attainment) diterbitkan lembaga pelatihan."],
+
+["P","Empat prinsip asesmen adalah…",["Valid, Reliabel, Fleksibel, Adil","Valid, Asli, Terkini, Memadai","Terukur, Obyektif, Tertelusuri, Akuntabel","Efektif, Efisien, Ekonomis, Etis"],"Prinsip asesmen: valid, reliabel, fleksibel, adil. VATM (valid, asli, terkini, memadai) adalah aturan bukti, bukan prinsip asesmen."],
+["P","Empat aturan bukti dalam asesmen berbasis kompetensi adalah…",["Valid, Asli, Terkini, Memadai","Valid, Reliabel, Fleksibel, Adil","Lengkap, Rapi, Benar, Tepat waktu","Langsung, Tidak langsung, Tambahan, Pendukung"],"Aturan bukti memastikan bukti yang dikumpulkan valid, asli, terkini, dan memadai (VATM)."],
+["P","Asesmen dianggap memenuhi prinsip valid apabila…",["Asesmen menilai apa yang memang seharusnya dinilai sesuai acuan pembanding","Hasilnya sama walaupun dilakukan asesor berbeda","Asesi boleh memilih waktu dan tempat asesmen","Asesmen tidak merugikan asesi tertentu"],"Valid berarti seluruh aktivitas asesmen mengacu pada acuan pembanding (benchmark), misalnya unit kompetensi SKKNI."],
+["P","Dua asesor berbeda menilai asesi yang sama dengan instrumen yang sama dan menghasilkan keputusan yang konsisten. Hal ini menunjukkan prinsip…",["Reliabel","Valid","Fleksibel","Adil"],"Reliabel berarti hasil asesmen diinterpretasikan secara konsisten dari konteks ke konteks dan dari orang ke orang."],
+["P","Sebuah asesmen menolak mengakui hasil belajar sebelumnya dan tidak memberi kesempatan asesmen ulang. Asesmen tersebut tidak memenuhi prinsip…",["Fleksibel","Reliabel","Valid","Terkini"],"Asesmen tidak fleksibel jika menolak hasil belajar sebelumnya atau tidak memberi kesempatan kedua/ketiga kepada asesi."],
+["P","Asesi tunarungu diberi instruksi tugas secara tertulis tanpa mengurangi kriteria unjuk kerja yang dinilai. Langkah ini paling mencerminkan prinsip…",["Adil","Reliabel","Asli","Terkini"],"Asesmen adil tidak merugikan asesi tertentu dan mendukung asesi, termasuk melalui penyesuaian yang beralasan (FR.AK.07)."],
+["P","Aturan bukti yang memastikan bahwa bukti merupakan hasil pekerjaan asesi sendiri adalah…",["Asli","Valid","Terkini","Memadai"],"Bukti asli/otentik harus dapat diverifikasi sebagai hasil kerja asesi sendiri, bukan karya orang lain."],
+["P","Asesi menyerahkan sertifikat pelatihan konfigurasi jaringan dari 8 tahun lalu, padahal teknologinya sudah banyak berubah. Aturan bukti yang paling dipertanyakan adalah…",["Terkini","Asli","Valid","Reliabel"],"Bukti terkini harus menunjukkan kompetensi asesi yang berlaku saat ini. Bukti lama perlu dilengkapi bukti tambahan."],
+["P","Bukti portofolio asesi hanya mencakup satu dari tiga elemen kompetensi pada unit yang diases. Bukti tersebut belum memenuhi aturan…",["Memadai","Asli","Terkini","Fleksibel"],"Memadai berkaitan dengan cukupnya bukti untuk seluruh elemen/KUK, dimensi kompetensi, dan employability skills."],
+["P","Cara yang tepat untuk memastikan keaslian bukti portofolio berupa laporan kerja asesi adalah…",["Melakukan wawancara dan/atau verifikasi pihak ketiga, misalnya kepada atasan asesi","Meminta asesi menandatangani ulang laporan di depan asesor","Menghitung jumlah halaman laporan","Membandingkan laporan asesi dengan laporan asesi lain"],"Keaslian dikonfirmasi lewat pertanyaan wawancara (FR.IA.09) atau verifikasi pihak ketiga (FR.IA.10)."],
+["P","Hasil penilaian dalam asesmen berbasis kompetensi dinyatakan dengan…",["Kompeten (K) atau Belum Kompeten (BK)","Nilai angka 0–100","Predikat A, B, C, D","Persentase ketercapaian"],"Asesmen berbasis kompetensi tidak memakai nilai persentase; keputusannya hanya Kompeten atau Belum Kompeten."],
+["P","Berikut ini yang BUKAN ciri penilaian berbasis kompetensi adalah…",["Membandingkan hasil seorang asesi dengan asesi lain untuk menentukan peringkat","Penilaian bersifat individual","Semua persyaratan standar harus dipenuhi","Fokus pada hasil dengan pengamatan pada proses dan hasil"],"Penilaian berbasis kompetensi mengacu pada standar, bukan pada perbandingan antarindividu (norm-referenced)."],
+["P","Suatu asesmen dikatakan adil apabila…",["Tidak merugikan asesi tertentu, terbuka, bebas penyimpangan, dan mendukung asesi","Semua asesi mendapat soal yang persis sama tanpa pengecualian apa pun","Asesi boleh menentukan sendiri keputusan asesmennya","Asesor menurunkan standar untuk asesi yang mengalami kesulitan"],"Adil tidak berarti seragam; penyesuaian yang beralasan justru diperbolehkan selama standar tetap terjaga."],
+["P","Aturan bukti “memadai” berhubungan dengan…",["Jumlah dan cakupan bukti yang memenuhi seluruh aspek unit kompetensi dan dimensi kompetensi","Tanggal pembuatan bukti","Siapa yang membuat bukti","Format penulisan bukti"],"Memadai = cukup banyak dan cukup luas: mencakup seluruh elemen/KUK, dimensi kompetensi, dan menunjukkan kompetensi secara berulang."],
+["P","Logbook kerja asesi dinyatakan valid sebagai bukti apabila…",["Isinya memenuhi persyaratan unit kompetensi/KUK yang sedang diases","Logbook dibuat dengan rapi dan berwarna","Logbook ditulis tangan oleh asesi","Logbook disimpan lebih dari lima tahun"],"Bukti valid adalah bukti yang relevan dengan persyaratan unit kompetensi atau standar spesifik yang diases."],
+["P","Penyesuaian yang beralasan (reasonable adjustment) terhadap metode asesmen boleh dilakukan dengan syarat…",["Tetap menjaga integritas standar kompetensi dan prinsip asesmen","Mengurangi jumlah KUK yang dinilai","Menghilangkan aspek kritis yang sulit dibuktikan","Menurunkan batas kelulusan"],"Penyesuaian hanya mengubah cara mengumpulkan bukti, bukan standar yang harus dicapai (KUK 3.4 Melaksanakan Asesmen)."],
+["P","Memberikan kesempatan Rekognisi Pembelajaran Lampau (RPL) kepada pekerja berpengalaman merupakan wujud prinsip asesmen…",["Fleksibel","Reliabel","Asli","Memadai"],"Asesmen fleksibel memenuhi kebutuhan asesi dan organisasi, termasuk mengakui pembelajaran dan pengalaman sebelumnya."],
+
+["D","Lima dimensi kompetensi yang harus diperhatikan dalam asesmen adalah…",["Task Skills, Task Management Skills, Contingency Management Skills, Job/Role Environment Skills, Transfer Skills","Knowledge, Skill, Attitude, Behavior, Value","Valid, Asli, Terkini, Memadai, Reliabel","Perencanaan, Pelaksanaan, Evaluasi, Pelaporan, Tindak lanjut"],"Dimensi kompetensi: TS, TMS, CMS, JRES, dan TRS."],
+["D","Saat praktik, asesi mendapati satu kabel UTP putus lalu segera menggantinya sehingga pekerjaan tetap selesai. Dimensi kompetensi yang terlihat adalah…",["Contingency Management Skills (CMS)","Task Skills (TS)","Transfer Skills (TRS)","Job/Role Environment Skills (JRES)"],"CMS adalah keterampilan menangani masalah atau kejadian tidak terduga saat menjalankan tugas."],
+["D","Asesi mematuhi aturan K3 dan tata tertib ruang lab selama bekerja. Dimensi kompetensi yang ditunjukkan adalah…",["Job/Role Environment Skills (JRES)","Task Management Skills (TMS)","Contingency Management Skills (CMS)","Transfer Skills (TRS)"],"JRES adalah keterampilan mengikuti kondisi dan aturan lingkungan tempat kerja."],
+["D","Asesi yang terbiasa menggunakan router merek A juga mampu mengonfigurasi router merek B dengan hasil yang sama. Dimensi ini disebut…",["Transfer Skills (TRS)","Task Skills (TS)","Job/Role Environment Skills (JRES)","Task Management Skills (TMS)"],"TRS adalah kemampuan mengadaptasi kompetensi pada kondisi, tempat kerja, konteks, atau objek lain."],
+["D","Asesi mengatur urutan beberapa pekerjaan (memasang kabel, mengatur IP, menguji koneksi) agar seluruhnya selesai tepat waktu. Dimensi kompetensi yang tampak adalah…",["Task Management Skills (TMS)","Task Skills (TS)","Contingency Management Skills (CMS)","Transfer Skills (TRS)"],"TMS adalah keterampilan mengelola beberapa tugas terkait sekaligus."],
+["D","Kemampuan asesi melakukan satu tugas tertentu sesuai standar, misalnya memasang konektor RJ-45 dengan urutan T568B, termasuk dimensi…",["Task Skills (TS)","Task Management Skills (TMS)","Transfer Skills (TRS)","Job/Role Environment Skills (JRES)"],"TS adalah keterampilan melaksanakan tugas individual yang dipersyaratkan."],
+["D","Kriteria Unjuk Kerja (KUK) adalah…",["Pernyataan evaluatif berisi pengetahuan, keterampilan, dan sikap kerja untuk menentukan apa yang dinilai dari capaian kinerja","Daftar peralatan yang harus disediakan TUK","Judul dari setiap unit kompetensi","Skor minimal untuk dinyatakan kompeten"],"KUK menjadi dasar penyusunan instrumen; setiap KUK harus memiliki bukti."],
+["D","Bagian panduan penilaian dalam unit kompetensi yang menunjukkan KUK yang paling penting dan wajib dibuktikan adalah…",["Aspek kritis","Batasan variabel","Judul unit","Deskripsi unit"],"Aspek kritis harus dikutip dari SKKNI dan selalu dipastikan ada buktinya dalam asesmen."],
+["D","SKKNI ditetapkan melalui…",["Keputusan Menteri Ketenagakerjaan","Keputusan Ketua BNSP","Keputusan Ketua LSP","Peraturan Gubernur"],"Contoh: SKKNI bidang Teknik Komputer dan Jaringan ditetapkan dengan Kepmenaker No. 321 Tahun 2016."],
+["D","Bagian unit kompetensi yang menjelaskan konteks, peralatan dan perlengkapan, peraturan, serta norma yang berkaitan dengan unit disebut…",["Batasan variabel","Aspek kritis","Elemen kompetensi","Kriteria unjuk kerja"],"Batasan variabel menjelaskan lingkup dan konteks penerapan unit kompetensi."],
+["D","Pada kode unit J.611000.003.02 (Merancang Topologi Jaringan), dua digit terakhir “02” menunjukkan…",["Versi unit kompetensi","Jenjang KKNI","Jumlah elemen kompetensi","Nomor urut skema"],"Bagian terakhir kode unit SKKNI menunjukkan versi unit; bagian sebelumnya adalah nomor urut unit."],
+["D","Elemen kompetensi adalah…",["Langkah-langkah kegiatan yang harus dilakukan untuk mencapai unit kompetensi","Kumpulan skema sertifikasi","Indikator kelulusan berupa angka","Formulir yang digunakan asesor"],"Setiap elemen kompetensi diuraikan lebih lanjut menjadi beberapa KUK."],
+
+["M","Kode unit kompetensi asesor “Merencanakan Aktivitas dan Proses Asesmen” yang digunakan dalam pelatihan ini adalah…",["M.74SPS03.088.2","M.74SPS03.090.1","M.74SPS03.095.1","M.74SPS03.089.1"],"MAPA = M.74SPS03.088.2; Melaksanakan Asesmen = M.74SPS03.090.1; MKVA = M.74SPS03.095.1."],
+["M","Formulir FR.MAPA.01 digunakan untuk…",["Merencanakan aktivitas dan proses asesmen (pendekatan, rencana asesmen, serta modifikasi dan kontekstualisasi)","Merekam keputusan asesmen kompetensi","Mencatat umpan balik asesi","Menjelaskan proses banding"],"FR.MAPA.01 mencakup elemen 1–3 unit MAPA."],
+["M","Formulir FR.MAPA.02 berisi…",["Peta instrumen asesmen berdasarkan pendekatan dan rencana asesmen untuk setiap potensi asesi","Daftar hadir peserta asesmen","Rekaman hasil observasi","Laporan asesmen kepada LSP"],"FR.MAPA.02 memetakan instrumen (FR.IA.01–FR.IA.11) yang dipakai untuk potensi asesi 1–5."],
+["M","Langkah pertama dalam merencanakan aktivitas dan proses asesmen adalah…",["Menentukan pendekatan asesmen: asesi, tujuan, konteks, orang yang relevan, dan acuan pembanding","Menyusun soal pilihan ganda","Menandatangani persetujuan asesmen","Membuat keputusan K/BK"],"Elemen 1 MAPA: menentukan pendekatan asesmen sebelum menyusun rencana dan instrumen."],
+["M","Seorang teknisi jaringan ingin kompetensi yang sudah ia miliki saat ini diakui. Tujuan asesmen yang paling tepat adalah…",["Pengakuan Kompetensi Terkini (PKT)","Hasil pelatihan","Sertifikasi ulang karena gagal","Tes penerimaan karyawan"],"PKT adalah pengakuan atas kompetensi terkini yang dimiliki asesi, biasanya dari pengalaman kerja."],
+["M","Rekognisi Pembelajaran Lampau (RPL) adalah…",["Pengakuan atas capaian pembelajaran yang diperoleh dari pendidikan formal, nonformal, informal, dan/atau pengalaman kerja","Ujian ulang bagi asesi yang belum kompeten","Pelatihan tambahan sebelum asesmen","Penilaian khusus untuk lulusan baru"],"RPL memungkinkan pembelajaran dan pengalaman sebelumnya diakui sebagai bukti kompetensi."],
+["M","Pada pendekatan asesmen, konfirmasi dilakukan dengan “orang yang relevan”. Contoh yang tepat adalah…",["Manajer sertifikasi LSP, master asesor, manajer pelatihan, atau supervisor tempat kerja","Teman sekelas asesi","Penyedia katering TUK","Orang tua asesi"],"Orang yang relevan adalah pihak yang berwenang atau berkepentingan terhadap proses asesmen."],
+["M","Lulusan SMK yang kurikulum dan fasilitas praktiknya mampu telusur terhadap standar kompetensi dikelompokkan sebagai…",["Potensi Asesi 1","Potensi Asesi 2","Potensi Asesi 3","Potensi Asesi 5"],"Potensi 1: hasil pelatihan/pendidikan yang kurikulum dan fasilitasnya mampu telusur ke standar; Potensi 2: belum berbasis kompetensi."],
+["M","Pekerja berpengalaman dari industri yang operasionalnya mampu telusur dengan standar kompetensi dikelompokkan sebagai…",["Potensi Asesi 3","Potensi Asesi 1","Potensi Asesi 4","Potensi Asesi 5"],"Potensi 3: pekerja berpengalaman dari industri yang telusur ke standar; Potensi 4: industri yang belum berbasis kompetensi."],
+["M","Asesi yang memperoleh kompetensinya melalui belajar mandiri tanpa guru dikelompokkan sebagai…",["Potensi Asesi 5 (otodidak)","Potensi Asesi 1","Potensi Asesi 2","Potensi Asesi 3"],"Potensi 5 adalah otodidak atau belajar mandiri."],
+["M","Bukti yang diperoleh asesor dari pengamatan langsung saat asesi bekerja, baik di tempat kerja nyata maupun simulasi, termasuk jenis…",["Bukti langsung (L)","Bukti tidak langsung (TL)","Bukti tambahan (T)","Bukti pendukung pihak ketiga"],"Bukti langsung didapat dari observasi atau demonstrasi kinerja asesi."],
+["M","Sertifikat pelatihan, laporan pekerjaan, dan logbook yang dibawa asesi termasuk jenis bukti…",["Tidak langsung (TL)","Langsung (L)","Tambahan (T)","Bukan bukti"],"Portofolio adalah bukti tidak langsung karena asesor tidak mengamati kinerjanya secara langsung."],
+["M","Menurut modul, penggunaan jenis bukti langsung harus disertai bukti tambahan berupa…",["Pertanyaan tertulis dan/atau pertanyaan lisan","Verifikasi portofolio","Verifikasi pihak ketiga saja","Surat keterangan kerja"],"Bukti langsung dilengkapi pertanyaan tertulis/lisan untuk menggali pengetahuan dan dimensi yang tidak tampak saat observasi."],
+["M","Penggunaan bukti tidak langsung dapat disertai bukti tambahan berupa…",["Pertanyaan wawancara, verifikasi pihak ketiga, pertanyaan lisan, atau pertanyaan tertulis","Hanya observasi langsung","Hanya tugas praktik demonstrasi","Tidak memerlukan bukti tambahan"],"Bukti tambahan untuk bukti TL dipakai untuk mengonfirmasi keaslian dan kecukupan portofolio."],
+["M","Tujuan menyusun peta kelompok pekerjaan adalah…",["Mengelompokkan unit-unit kompetensi dalam skema berdasarkan keterkaitan aktivitas kerja agar asesmen lebih efisien dan terintegrasi","Membagi asesi ke dalam beberapa kelas","Menentukan honor asesor per kelompok","Mengurutkan unit berdasarkan abjad"],"Contoh: unit Merancang Topologi Jaringan dan Merancang Pengalamatan Jaringan dapat dikelompokkan dan diases bersama."],
+["M","Metode observasi langsung dapat berupa…",["Kerja nyata di tempat kerja atau aktivitas kerja di lingkungan tempat kerja yang disimulasikan","Pertanyaan wawancara melalui telepon","Pemeriksaan sertifikat pelatihan","Ujian tertulis pilihan ganda"],"Observasi langsung mengamati kinerja asesi secara nyata atau dalam simulasi."],
+["M","Yang termasuk metode kegiatan terstruktur adalah…",["Latihan simulasi dan permainan peran, proyek, presentasi, serta lembar kegiatan","Verifikasi portofolio dan wawancara","Pertanyaan lisan dan tertulis","Verifikasi pihak ketiga"],"Kegiatan terstruktur menggunakan FR.IA.04A (DIT) dan FR.IA.04B (penilaian)."],
+["M","Rencana asesmen umumnya memuat informasi berikut, KECUALI…",["Peringkat asesi dibandingkan peserta lain","Apa yang diases","Kapan dan di mana asesmen dilakukan","Metode dan perangkat asesmen yang digunakan"],"Rencana asesmen menjelaskan apa, kapan, di mana, bagaimana, dan oleh siapa asesmen dilakukan. Peringkat tidak dikenal dalam asesmen berbasis kompetensi."],
+["M","Kontekstualisasi dalam rencana asesmen berarti…",["Menyesuaikan rencana dan instrumen dengan karakteristik asesi dan kondisi tempat kerja tanpa mengubah standar kompetensi","Mengganti unit kompetensi dengan yang lebih mudah","Menghapus KUK yang tidak sesuai tempat kerja","Mengubah keputusan asesmen sesuai keinginan asesi"],"Contoh: menyesuaikan istilah atau peralatan dengan yang dipakai di tempat kerja asesi, sementara KUK tetap utuh."],
+["M","Menurut KUK unit MAPA, rencana asesmen yang telah dikembangkan selanjutnya…",["Mendapatkan persetujuan dari para pemangku kepentingan terkait","Langsung digunakan tanpa dibahas","Dirahasiakan dari LSP","Diserahkan kepada asesi untuk diubah sesukanya"],"KUK 2.2 MAPA: rencana asesmen dikembangkan dan persetujuan didapatkan dari pemangku kepentingan terkait."],
+
+["I","FR.IA.01 adalah formulir…",["Ceklis Observasi aktivitas di tempat kerja atau tempat kerja simulasi","Tugas Praktik Demonstrasi","Pertanyaan Tertulis Pilihan Ganda","Ceklis Verifikasi Portofolio"],"FR.IA.01.CL dipakai asesor untuk mencatat pencapaian KUK saat mengamati asesi."],
+["I","FR.IA.02 adalah formulir…",["Tugas Praktik Demonstrasi (TPD)","Ceklis Observasi","Pertanyaan Lisan","Ceklis Reviu Produk"],"FR.IA.02.TPD berisi skenario, instruksi kerja, alat dan bahan, serta waktu untuk praktik asesi."],
+["I","FR.IA.03 adalah formulir…",["Pertanyaan untuk Mendukung Observasi (PMO)","Pertanyaan Wawancara","Daftar Instruksi Terstruktur","Klarifikasi Bukti Pihak Ketiga"],"PMO menggali pengetahuan dan dimensi kompetensi yang tidak tampak selama observasi."],
+["I","FR.IA.04A adalah…",["Daftar Instruksi Terstruktur (DIT) berisi penjelasan proyek singkat atau kegiatan terstruktur lainnya","Ceklis Observasi","Lembar jawaban pilihan ganda","Ceklis Verifikasi Portofolio"],"FR.IA.04A memberi skenario/proyek kepada asesi; penilaiannya direkam di FR.IA.04B."],
+["I","Instrumen pertanyaan tertulis bentuk pilihan ganda adalah…",["FR.IA.05","FR.IA.06","FR.IA.07","FR.IA.09"],"FR.IA.05 = pertanyaan tertulis pilihan ganda; FR.IA.06 = esai; FR.IA.07 = lisan; FR.IA.09 = wawancara."],
+["I","Instrumen pertanyaan tertulis bentuk esai adalah…",["FR.IA.06","FR.IA.05","FR.IA.03","FR.IA.11"],"FR.IA.06 terdiri atas soal (A), kunci jawaban (B), dan lembar jawab (C)."],
+["I","Instrumen pertanyaan lisan adalah…",["FR.IA.07","FR.IA.03","FR.IA.09","FR.IA.10"],"FR.IA.07 berisi pertanyaan lisan dan kunci jawabannya sebagai bukti tambahan."],
+["I","Ceklis Verifikasi Portofolio (CVP) menggunakan formulir…",["FR.IA.08","FR.IA.09","FR.IA.10","FR.IA.11"],"FR.IA.08 memeriksa setiap bukti portofolio terhadap aturan bukti VATM."],
+["I","Pertanyaan Wawancara (PW) menggunakan formulir…",["FR.IA.09","FR.IA.07","FR.IA.08","FR.IA.03"],"FR.IA.09 dipakai untuk mengklarifikasi substansi elemen/KUK yang belum jelas dari portofolio."],
+["I","Klarifikasi bukti melalui atasan atau rekan kerja asesi menggunakan formulir…",["FR.IA.10 Verifikasi Pihak Ketiga","FR.IA.09 Pertanyaan Wawancara","FR.IA.08 Verifikasi Portofolio","FR.IA.04B Penilaian Proyek"],"FR.IA.10 mengonfirmasi kinerja asesi kepada pihak ketiga, misalnya supervisor."],
+["I","FR.IA.11 adalah formulir…",["Ceklis Reviu Produk (CRP)","Ceklis Observasi","Pertanyaan Lisan","Rekaman Asesmen Kompetensi"],"FR.IA.11 dipakai untuk menilai produk hasil kerja asesi terhadap spesifikasi."],
+["I","Kombinasi instrumen yang tepat untuk metode observasi langsung pada bukti langsung adalah…",["FR.IA.01 (CL) + FR.IA.02 (TPD) + FR.IA.03 (PMO)","FR.IA.08 (CVP) + FR.IA.09 (PW)","FR.IA.10 (VPK) + FR.IA.11 (CRP)","FR.IA.04A + FR.IA.08"],"Asesi mengerjakan TPD, asesor mengisi ceklis observasi, lalu mengajukan PMO."],
+["I","Untuk asesi pekerja berpengalaman (Potensi Asesi 3) dengan bukti tidak langsung, instrumen yang umum digunakan adalah…",["FR.IA.08 (CVP) + FR.IA.09 (PW), bila perlu ditambah FR.IA.10 (VPK)","FR.IA.01 + FR.IA.02 saja","FR.IA.04A + FR.IA.04B saja","FR.IA.05 saja"],"Portofolio diverifikasi dengan CVP, lalu diklarifikasi melalui wawancara dan/atau pihak ketiga."],
+["I","Hasil verifikasi portofolio menunjukkan bukti belum memenuhi aturan VATM. Langkah asesor selanjutnya adalah…",["Melanjutkan dengan pertanyaan wawancara dan/atau verifikasi pihak ketiga","Langsung menyatakan asesi Belum Kompeten tanpa tindak lanjut","Menerima bukti apa adanya","Meminta asesor lain menandatangani bukti"],"Modul menyatakan bila portofolio belum memenuhi aturan bukti, asesor menggunakan tanya jawab wawancara dan/atau verifikasi pihak ketiga."],
+["I","Pada FR.IA.01, sebuah KUK belum terlihat tercapai selama observasi. Tindakan asesor yang tepat adalah…",["Melakukan penilaian lanjut, misalnya melalui pertanyaan lisan/tertulis, untuk KUK tersebut","Mencentang “Ya” agar asesi tidak dirugikan","Menghapus KUK tersebut dari ceklis","Mengganti asesi dengan asesi lain"],"Alur observasi: KUK yang belum tercapai ditindaklanjuti (FR.IA.05/06/07) sebelum keputusan dibuat."],
+["I","Pertanyaan pada FR.IA.03 (PMO) sebaiknya dirancang untuk…",["Menggali pengetahuan dan dimensi kompetensi yang tidak terlihat saat observasi, misalnya “Apa yang Anda lakukan jika…?”","Mengulang instruksi tugas praktik","Menanyakan data pribadi asesi","Menguji kecepatan mengetik asesi"],"PMO melengkapi observasi, terutama untuk CMS, TRS, dan pengetahuan pendukung."],
+["I","Dalam format Buku Kerja Asesor 2023, dokumen kunci jawaban soal pilihan ganda adalah…",["FR.IA.05.B","FR.IA.05.A","FR.IA.05.C","FR.IA.06.A"],"FR.IA.05.A = soal, FR.IA.05.B = kunci jawaban, FR.IA.05.C = lembar jawab."],
+
+["A","Kode unit kompetensi asesor “Melaksanakan Asesmen” adalah…",["M.74SPS03.090.1","M.74SPS03.088.2","M.74SPS03.095.1","M.74SPS03.091.1"],"Melaksanakan Asesmen terdiri atas 6 elemen: menetapkan lingkungan asesmen hingga meninjau proses asesmen."],
+["A","Formulir permohonan sertifikasi kompetensi yang diisi oleh pemohon adalah…",["FR.APL.01","FR.APL.02","FR.AK.01","FR.MAPA.01"],"FR.APL.01 berisi data pribadi, data pekerjaan, skema yang dipilih, dan bukti persyaratan dasar."],
+["A","Asesmen mandiri, yaitu ketika asesi menilai dirinya sendiri terhadap elemen kompetensi, dicatat pada…",["FR.APL.02","FR.APL.01","FR.AK.02","FR.IA.08"],"Pada FR.APL.02 asesi menyatakan K/BK per elemen beserta bukti relevan, lalu asesor memberi rekomendasi."],
+["A","Formulir persetujuan asesmen dan kerahasiaan yang ditandatangani asesor dan asesi sebelum asesmen dimulai adalah…",["FR.AK.01","FR.AK.02","FR.AK.04","FR.AK.05"],"FR.AK.01 memuat bukti yang akan dikumpulkan, jadwal, TUK, dan pernyataan kerahasiaan."],
+["A","Formulir yang digunakan asesi untuk mengajukan banding atas keputusan asesmen adalah…",["FR.AK.04","FR.AK.03","FR.AK.06","FR.AK.07"],"Hak dan proses banding dijelaskan kepada asesi pada tahap pra-asesmen."],
+["A","Rekaman asesmen kompetensi yang berisi rekomendasi Kompeten/Belum Kompeten per unit serta jenis bukti yang digunakan dicatat pada…",["FR.AK.02","FR.AK.01","FR.AK.05","FR.APL.02"],"FR.AK.02 mencatat bukti (observasi, portofolio, pertanyaan, dll.) per unit beserta rekomendasi asesor."],
+["A","Formulir umpan balik dan catatan asesmen, yaitu ketika asesi memberi tanggapan atas proses asesmen yang dijalaninya, adalah…",["FR.AK.03","FR.AK.02","FR.AK.06","FR.IA.09"],"Umpan balik dua arah merupakan bagian dari elemen mendukung asesi dan membuat keputusan."],
+["A","Urutan tahapan melaksanakan asesmen yang benar adalah…",["Pra-asesmen → pengumpulan bukti (asesmen) → keputusan asesmen → laporan dan tinjauan asesmen","Keputusan → pengumpulan bukti → pra-asesmen → laporan","Pengumpulan bukti → pra-asesmen → laporan → keputusan","Laporan → pra-asesmen → keputusan → pengumpulan bukti"],"Alur di slide Melaksanakan Asesmen: pra-asesmen, asesmen, keputusan, laporan & meninjau asesmen."],
+["A","Laporan asesmen dan tinjauan proses asesmen didokumentasikan berturut-turut pada formulir…",["FR.AK.05 dan FR.AK.06","FR.AK.01 dan FR.AK.02","FR.AK.03 dan FR.AK.04","FR.MAPA.01 dan FR.MAPA.02"],"FR.AK.05 = laporan asesmen; FR.AK.06 = meninjau proses asesmen (refleksi untuk perbaikan)."],
+["A","Ceklis penyesuaian yang wajar dan beralasan untuk asesi dengan kebutuhan khusus dicatat pada…",["FR.AK.07","FR.AK.04","FR.AK.06","FR.IA.11"],"FR.AK.07 mengidentifikasi karakteristik asesi dan penyesuaian metode/perangkat yang disepakati."],
+["A","Pihak yang menetapkan keputusan sertifikasi dan menerbitkan sertifikat kompetensi adalah…",["LSP, berdasarkan rekomendasi asesor","Asesor yang menguji","Kepala TUK","Asesi melalui asesmen mandiri"],"Asesor memberi rekomendasi K/BK; keputusan sertifikasi ditetapkan oleh LSP."],
+["A","Saat observasi, asesi hampir menyentuh kabel listrik terbuka di meja praktik. Tindakan asesor yang tepat adalah…",["Segera menghentikan aktivitas dan menanggulangi risiko K3 tersebut","Membiarkannya agar terlihat apakah asesi menyadari bahaya","Mencatatnya saja di FR.IA.01 lalu melanjutkan","Menunggu asesmen selesai baru menegur"],"KUK 3.6 Melaksanakan Asesmen: risiko K3 terhadap orang atau peralatan ditanggulangi dengan segera."],
+
+["V","Kode unit kompetensi asesor “Memberikan Kontribusi dalam Validasi Asesmen” (MKVA) adalah…",["M.74SPS03.095.1","M.74SPS03.090.1","M.74SPS03.088.2","M.74SPS03.094.1"],"MKVA adalah unit ketiga yang dipelajari dalam pelatihan asesor ini."],
+["V","Tujuan utama validasi asesmen adalah…",["Memastikan proses, perangkat, bukti, dan keputusan asesmen sesuai prinsip asesmen dan aturan bukti, serta meningkatkan mutu asesmen","Mencari kesalahan asesor untuk diberi sanksi","Menaikkan jumlah asesi yang kompeten","Mengganti standar kompetensi yang sulit"],"Validasi adalah proses jaminan mutu untuk memastikan asesmen konsisten dan dapat dipertanggungjawabkan."],
+["V","Validasi asesmen dapat dilakukan pada waktu…",["Sebelum, selama, dan setelah asesmen","Hanya setelah sertifikat diterbitkan","Hanya pada saat asesmen berlangsung","Hanya ketika ada banding"],"Validasi pra-asesmen memeriksa perangkat, validasi selama asesmen memeriksa proses, dan validasi pasca-asesmen memeriksa bukti dan keputusan."],
+["V","Berikut ini yang BUKAN fokus validasi asesmen adalah…",["Besaran honor asesor","Proses asesmen","Perangkat (instrumen) asesmen","Keputusan asesmen"],"Fokus validasi: proses asesmen, perangkat asesmen, bukti yang dikumpulkan, dan keputusan asesmen."],
+["V","Validasi yang dilakukan sebelum asesmen umumnya difokuskan pada…",["Kesesuaian perangkat asesmen (MUK) dengan unit kompetensi sebelum digunakan","Keputusan K/BK yang sudah dibuat","Umpan balik asesi setelah asesmen","Laporan keuangan TUK"],"Pra-asesmen: memeriksa apakah instrumen mencakup seluruh KUK, aspek kritis, dan dimensi kompetensi."],
+["V","Hasil validasi berupa temuan dan rekomendasi perbaikan sebaiknya…",["Didokumentasikan dan ditindaklanjuti untuk perbaikan sistem dan perangkat asesmen","Disimpan pribadi oleh validator","Dihapus setelah rapat selesai","Diumumkan kepada asesi sebagai nilai"],"Kontribusi hasil validasi direkam dan digunakan untuk perbaikan berkelanjutan."],
+["V","Agar hasil validasi obyektif, proses validasi sebaiknya melibatkan…",["Beberapa pihak terkait, misalnya asesor lain, master asesor, dan praktisi industri","Hanya asesor yang menyusun perangkat itu sendiri","Hanya asesi","Hanya petugas administrasi LSP"],"Melibatkan pihak lain mengurangi bias dan memperkuat konsistensi (reliabilitas) asesmen."]
+];
+
+const LET = ["A","B","C","D"];
+const $ = s => document.querySelector(s);
+const KEY = "kuis-asesor-v1";
+let S;
+
+function rng(seed){ return () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }; }
+function shuffle(arr, r){ const a = arr.slice(); for(let i=a.length-1;i>0;i--){ const j = Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function build(cfg){
+  const seed = (Date.now() ^ Math.floor(Math.random()*1e9)) >>> 0;
+  const r = rng(seed);
+  let pool = Q.map((_,i)=>i).filter(i => cfg.topics.includes(Q[i][0]));
+  if(cfg.shuffle) pool = shuffle(pool, r);
+  if(cfg.n && cfg.n < pool.length){
+    pool = cfg.shuffle ? pool.slice(0,cfg.n) : shuffle(pool, r).slice(0,cfg.n).sort((a,b)=>a-b);
+  }
+  const perm = {};
+  pool.forEach(i => perm[i] = shuffle([0,1,2,3], r));
+  return { cfg, order: pool, perm, ans: {}, pos: 0, finished: false };
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function load(){
+  try{
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if(s && Array.isArray(s.order) && s.order.length && s.order.every(i => Q[i])) return s;
+  }catch(e){}
+  return null;
+}
+const showFeedback = i => S.ans[i] !== undefined && (S.cfg.mode === "latihan" || S.finished);
+const isRight = i => S.ans[i] === 0;
+
+function tally(){
+  let r=0,w=0,d=0;
+  S.order.forEach(i => { if(S.ans[i]!==undefined){ d++; if(isRight(i)) r++; else w++; } });
+  return {r,w,d,t:S.order.length};
+}
+
+function renderHeader(){
+  const t = tally(); const hide = S.cfg.mode === "ujian" && !S.finished;
+  $("#tRight").textContent = hide ? "–" : t.r;
+  $("#tWrong").textContent = hide ? "–" : t.w;
+  $("#tDone").textContent = t.d;
+  $("#tTotal").textContent = "/ " + t.t + " dijawab";
+  $("#prog").style.width = (t.d / t.t * 100) + "%";
+}
+
+function renderSettings(){
+  const c = S.cfg;
+  document.querySelectorAll("#modeSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode===pending.mode));
+  document.querySelectorAll("#countSeg button").forEach(b => b.setAttribute("aria-pressed", +b.dataset.n===pending.n));
+  document.querySelectorAll("#orderSeg button").forEach(b => b.setAttribute("aria-pressed", !!+b.dataset.sh===pending.shuffle));
+  const box = $("#topicChips"); box.innerHTML = "";
+  Object.entries(TOPICS).forEach(([k,name]) => {
+    const n = Q.filter(q=>q[0]===k).length;
+    const b = document.createElement("button");
+    b.type="button"; b.className="chip"; b.id="tp-"+k;
+    b.setAttribute("aria-pressed", pending.topics.includes(k));
+    b.innerHTML = name + "<small>" + n + "</small>";
+    b.onclick = () => {
+      const on = pending.topics.includes(k);
+      if(on && pending.topics.length===1) return;
+      pending.topics = on ? pending.topics.filter(x=>x!==k) : [...pending.topics,k];
+      renderSettings();
+    };
+    box.appendChild(b);
+  });
+}
+
+function renderQuestion(){
+  const i = S.order[S.pos], q = Q[i], perm = S.perm[i];
+  const chosen = S.ans[i], fb = showFeedback(i);
+  const main = $("#main"); main.innerHTML = "";
+  const card = document.createElement("article"); card.className = "card";
+  card.innerHTML = `<div class="meta mono"><span>SOAL ${S.pos+1} / ${S.order.length} · <span class="topic">${TOPICS[q[0]].toUpperCase()}</span></span><span>No. bank soal ${i+1}</span></div>
+    <p class="qtext">${q[1]}</p>`;
+  const ul = document.createElement("ul"); ul.className = "opts";
+  perm.forEach((orig, k) => {
+    const li = document.createElement("li");
+    const b = document.createElement("button"); b.type="button"; b.className="opt"; b.id = "opt-"+k;
+    let mark = "";
+    if(fb){
+      if(orig===0){ b.classList.add("right"); mark = "KUNCI"; }
+      else if(orig===chosen){ b.classList.add("wrong"); mark = "JAWABAN ANDA"; }
+      b.disabled = true;
+    } else if(orig===chosen){ b.classList.add("sel"); }
+    if(S.finished) b.disabled = true;
+    b.innerHTML = `<span class="let">${LET[k]}</span><span>${q[2][orig]}</span><span class="mark">${mark}</span>`;
+    b.onclick = () => choose(k);
+    li.appendChild(b); ul.appendChild(li);
+  });
+  card.appendChild(ul);
+  if(fb){
+    const ok = isRight(i);
+    const ex = document.createElement("div"); ex.className = "expl " + (ok?"ok":"bad");
+    const keyLetter = LET[perm.indexOf(0)];
+    ex.innerHTML = `<b>${ok ? "Benar" : "Kurang tepat · kunci " + keyLetter}</b>${q[3]}`;
+    card.appendChild(ex);
+  }
+  const nav = document.createElement("div"); nav.className = "nav";
+  const last = S.pos === S.order.length-1;
+  nav.innerHTML = `<button type="button" class="btn ghost" id="bPrev" ${S.pos===0?"disabled":""}>← Sebelumnya</button>
+    <div class="r">
+      ${S.finished ? `<button type="button" class="btn ghost" id="bRes">Lihat hasil</button>` : `<button type="button" class="btn ghost" id="bFin">Selesai & nilai</button>`}
+      <button type="button" class="btn" id="bNext" ${last?"disabled":""}>Berikutnya →</button>
+    </div>`;
+  card.appendChild(nav);
+  const hint = document.createElement("div"); hint.className = "hint kbd";
+  hint.textContent = "Pintasan: tombol A–D atau 1–4 untuk menjawab, ← → untuk pindah soal.";
+  card.appendChild(hint);
+  main.appendChild(card);
+  $("#bPrev").onclick = () => go(S.pos-1);
+  $("#bNext").onclick = () => go(S.pos+1);
+  if($("#bFin")) $("#bFin").onclick = finish;
+  if($("#bRes")) $("#bRes").onclick = renderResult;
+  renderGrid(); renderHeader();
+}
+
+function renderGrid(){
+  const g = $("#numgrid"); g.innerHTML = "";
+  $("#gridWrap").hidden = false;
+  S.order.forEach((i,p) => {
+    const b = document.createElement("button"); b.type="button"; b.className="num"; b.id="n-"+p;
+    b.textContent = p+1;
+    if(S.ans[i]!==undefined){
+      if(showFeedback(i)) b.classList.add(isRight(i)?"right":"wrong"); else b.classList.add("done");
+    }
+    if(p===S.pos && $("#main .card")) b.classList.add("cur");
+    b.setAttribute("aria-label","Soal "+(p+1));
+    b.onclick = () => go(p);
+    g.appendChild(b);
+  });
+}
+
+/* Jeda "jawaban dikunci" (nada tegang) sebelum hasil tampil — hanya mode latihan & suara aktif */
+let pendingReveal = null;
+function choose(k){
+  const i = S.order[S.pos];
+  if(S.finished) return;
+  if(pendingReveal && pendingReveal.S === S) return;
+  if(S.cfg.mode==="latihan" && S.ans[i]!==undefined) return;
+  S.ans[i] = S.perm[i][k];
+  save();
+  if(S.cfg.mode==="latihan" && SND.isOn()){
+    document.querySelectorAll("#main .opt").forEach((b,idx) => { b.disabled = true; b.classList.remove("sel"); if(idx===k) b.classList.add("lock"); });
+    SND.tension();
+    const ctx = { S, pos: S.pos };
+    pendingReveal = ctx;
+    ctx.t = setTimeout(() => {
+      if(pendingReveal === ctx) pendingReveal = null;
+      if(S !== ctx.S || S.pos !== ctx.pos || S.finished) return;
+      renderQuestion(); revealFx(i);
+    }, 1150);
+    return;
+  }
+  renderQuestion();
+  if(S.cfg.mode==="latihan") revealFx(i); else SND.lockIn();
+  if(S.cfg.mode==="ujian" && S.pos < S.order.length-1) setTimeout(()=>go(S.pos+1), 220);
+}
+function revealFx(i){
+  const ok = isRight(i);
+  if(ok) SND.right(); else SND.wrong();
+  const key = $("#opt-" + S.perm[i].indexOf(0)); if(key) key.classList.add("reveal");
+  if(!ok){ const c = $("#main .card"); if(c) c.classList.add("shake"); if(navigator.vibrate && SND.isOn()) try{ navigator.vibrate(120); }catch(e){} }
+}
+function go(p){
+  if(p<0||p>=S.order.length) return;
+  if(pendingReveal){ clearTimeout(pendingReveal.t); pendingReveal = null; }
+  S.pos=p; save(); renderQuestion(); $("#main").scrollIntoView({block:"nearest"});
+}
+
+function finish(){
+  const t = tally();
+  if(t.d < t.t && !finishArmed){
+    finishArmed = true;
+    const b = $("#bFin"); b.textContent = `${t.t-t.d} soal belum dijawab. Klik lagi untuk menilai`;
+    setTimeout(()=>{ finishArmed=false; if($("#bFin")) $("#bFin").textContent="Selesai & nilai"; }, 4000);
+    return;
+  }
+  finishArmed = false;
+  if(pendingReveal){ clearTimeout(pendingReveal.t); pendingReveal = null; }
+  S.finished = true; save(); renderResult();
+  SND.final(Math.round(t.r / t.t * 100) >= 75);
+}
+let finishArmed = false;
+
+function renderResult(){
+  const t = tally(); const pct = Math.round(t.r / t.t * 100);
+  const pass = pct >= 75;
+  const by = {};
+  S.order.forEach(i => { const k=Q[i][0]; by[k] = by[k]||{n:0,r:0}; by[k].n++; if(isRight(i)) by[k].r++; });
+  const wrong = S.order.map((i,p)=>({i,p})).filter(x => !isRight(x.i));
+  const main = $("#main"); main.innerHTML = "";
+  const card = document.createElement("article"); card.className = "card result";
+  card.innerHTML = `
+    <div class="meta mono"><span>REKAP HASIL LATIHAN · ${S.cfg.mode.toUpperCase()}</span><span>${t.t} soal</span></div>
+    <div class="verdict">
+      <div class="stamp ${pass?"k":"bk"}">${pass?"Siap diuji":"Perlu belajar lagi"}<small>${pass?"≥ 75% benar":"< 75% benar"}</small></div>
+      <div>
+        <div class="big">${t.r}<span> / ${t.t} benar · ${pct}%</span></div>
+        <p class="note">Ambang 75% hanya penanda kesiapan pribadi. Dalam asesmen berbasis kompetensi yang sebenarnya, keputusan hanya Kompeten atau Belum Kompeten berdasarkan bukti, tanpa nilai persentase.</p>
+      </div>
+    </div>
+    <h3 class="sec">Per materi</h3>
+    <div class="tablewrap"><table class="bytopic"><thead><tr><th>Materi</th><th class="n">Benar</th><th style="width:35%">Capaian</th></tr></thead><tbody>
+      ${Object.keys(TOPICS).filter(k=>by[k]).map(k=>`<tr><td>${TOPICS[k]}</td><td class="n">${by[k].r} / ${by[k].n}</td><td><div class="bar"><i style="width:${by[k].r/by[k].n*100}%"></i></div></td></tr>`).join("")}
+    </tbody></table></div>
+    <div class="actions">
+      ${wrong.length ? `<button type="button" class="btn accent" id="rWrong">Ulangi ${wrong.length} soal yang salah/kosong</button>` : ""}
+      <button type="button" class="btn" id="rAgain">Ulangi semua (acak)</button>
+      <button type="button" class="btn ghost" id="rReview">Tinjau dari soal 1</button>
+    </div>
+    ${wrong.length ? `<h3 class="sec">Soal yang perlu dipelajari lagi</h3><ul class="wronglist">${wrong.map(({i,p})=>{
+      const q=Q[i]; const a=S.ans[i];
+      return `<li><div class="q">${p+1}. ${q[1]}</div><div class="a">Kunci: ${q[2][0]}</div>${a!==undefined?`<div class="y">Jawaban Anda: ${q[2][a]}</div>`:`<div class="y">Tidak dijawab</div>`}<div class="hint">${q[3]}</div></li>`;}).join("")}</ul>` : ""}
+  `;
+  main.appendChild(card);
+  renderGrid(); renderHeader();
+  if($("#rWrong")) $("#rWrong").onclick = () => {
+    const ids = wrong.map(x=>x.i); const r = rng(Date.now()>>>0);
+    const perm = {}; ids.forEach(i=>perm[i]=shuffle([0,1,2,3],r));
+    S = { cfg:{...S.cfg}, order: shuffle(ids,r), perm, ans:{}, pos:0, finished:false };
+    save(); renderQuestion();
+  };
+  $("#rAgain").onclick = () => { S = build({...S.cfg, shuffle:true}); pending = {...S.cfg}; renderSettings(); save(); renderQuestion(); };
+  $("#rReview").onclick = () => go(0);
+  main.scrollIntoView({block:"nearest"});
+}
+
+/* ===== Efek suara bergaya kuis TV — disintesis Web Audio API (tanpa file audio) =====
+   AudioContext baru dibuat/di-resume setelah sentuhan/klik/tombol pertama (aturan autoplay HP). */
+const SND = (() => {
+  const PKEY = "kuis-asesor-sound";
+  let on = true;
+  try{ on = localStorage.getItem(PKEY) !== "0"; }catch(e){}
+  let ctx = null, master = null, noiseBuf = null;
+
+  function ensure(){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    if(!ctx){
+      try{ ctx = new AC(); }catch(e){ return null; }
+      const comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -14; comp.ratio.value = 4;
+      master = ctx.createGain(); master.gain.value = on ? .6 : 0;
+      master.connect(comp); comp.connect(ctx.destination);
+      // buffer hening: "membuka kunci" audio di iOS Safari
+      const b = ctx.createBuffer(1, 1, 22050), s = ctx.createBufferSource();
+      s.buffer = b; s.connect(ctx.destination); s.start(0);
+      noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const d = noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+    }
+    if(ctx.state === "suspended") ctx.resume().catch(()=>{});
+    return ctx;
+  }
+  const unlock = () => { if(on) ensure(); };
+  ["pointerdown","pointerup","touchend","keydown","click"].forEach(ev =>
+    window.addEventListener(ev, unlock, { capture:true, passive:true }));
+
+  const ready = () => on && ensure() && ctx.state !== "closed";
+
+  // satu nada: osilator → lowpass → envelope
+  function tone({ f, t=0, d=.3, type="sawtooth", g=.15, f2=0, cut=2200, q=.8, a=.012, det=0 }){
+    const now = ctx.currentTime + t;
+    const o = ctx.createOscillator(); o.type = type; o.detune.value = det;
+    o.frequency.setValueAtTime(f, now);
+    if(f2) o.frequency.exponentialRampToValueAtTime(f2, now + d);
+    const fl = ctx.createBiquadFilter(); fl.type = "lowpass"; fl.frequency.value = cut; fl.Q.value = q;
+    const v = ctx.createGain();
+    v.gain.setValueAtTime(.0001, now);
+    v.gain.exponentialRampToValueAtTime(g, now + a);
+    v.gain.setValueAtTime(g, now + Math.max(a, d * .55));
+    v.gain.exponentialRampToValueAtTime(.0001, now + d);
+    o.connect(fl); fl.connect(v); v.connect(master);
+    o.start(now); o.stop(now + d + .05);
+  }
+  // "brass" sintetis: dua saw sedikit dideturn + oktaf bawah
+  function brass(f, t, d, g=.11){
+    tone({ f, t, d, g, cut:2000, det:-8, a:.03 });
+    tone({ f, t, d, g:g*.8, cut:2000, det:8, a:.03 });
+    tone({ f:f/2, t, d, g:g*.45, type:"triangle", cut:1200, a:.03 });
+  }
+  // desis simbal / swell
+  function noise({ t=0, d=.8, g=.12, hp=5000, swell=false }){
+    const now = ctx.currentTime + t;
+    const s = ctx.createBufferSource(); s.buffer = noiseBuf;
+    const fl = ctx.createBiquadFilter(); fl.type = "highpass"; fl.frequency.value = hp;
+    const v = ctx.createGain();
+    if(swell){ v.gain.setValueAtTime(.0001, now); v.gain.exponentialRampToValueAtTime(g, now + d*.85); v.gain.exponentialRampToValueAtTime(.0001, now + d); }
+    else { v.gain.setValueAtTime(g, now); v.gain.exponentialRampToValueAtTime(.0001, now + d); }
+    s.connect(fl); fl.connect(v); v.connect(master);
+    s.start(now); s.stop(now + d + .05);
+  }
+  // dentum bass (seperti timpani/denyut jantung)
+  function thump(t, f=78, g=.5, d=.28){ tone({ f, f2:f*.5, t, d, g, type:"sine", cut:600, a:.005 }); }
+
+  const N = n => 440 * Math.pow(2, (n - 69) / 12); // nomor MIDI → Hz
+
+  return {
+    isOn: () => on,
+    set(v){
+      on = !!v;
+      try{ localStorage.setItem(PKEY, on ? "1" : "0"); }catch(e){}
+      if(on) ensure();
+      if(master && ctx) master.gain.setTargetAtTime(on ? .6 : 0, ctx.currentTime, .02);
+    },
+    // jawaban dipilih: drone rendah + denyut + sapuan naik (±1,1 detik)
+    tension(){
+      if(!ready()) return;
+      tone({ f:N(38), t:0, d:1.1, type:"sawtooth", g:.07, cut:420, a:.08 });
+      tone({ f:N(50), t:0, d:1.1, type:"square", g:.025, cut:600, a:.08, det:6 });
+      tone({ f:N(62), f2:N(69), t:.05, d:1.0, type:"sawtooth", g:.035, cut:1500, a:.4 });
+      [0, .36, .72].forEach((t,k) => thump(t, 72, .35 + k*.08));
+      noise({ t:.1, d:1.0, g:.05, hp:7000, swell:true });
+    },
+    // jawaban benar: arpeggio naik + akor mayor terang + simbal + kilau
+    right(){
+      if(!ready()) return;
+      const base = 62; // D
+      [[base,0],[base+4,.09],[base+7,.18]].forEach(([n,t]) => brass(N(n), t, .16, .1));
+      [base+7, base+12, base+16, base+19].forEach(n => brass(N(n), .28, 1.1, .085));
+      thump(.28, 90, .45, .35);
+      noise({ t:.28, d:1.3, g:.09, hp:6000 });
+      [base+24, base+28, base+31, base+36].forEach((n,k) => tone({ f:N(n), t:.4 + k*.07, d:.35, type:"triangle", g:.05, cut:9000, a:.005 }));
+    },
+    // jawaban salah: dua nada turun yang "melorot", gelap
+    wrong(){
+      if(!ready()) return;
+      tone({ f:N(45), f2:N(44), t:0, d:.42, g:.16, cut:700, det:-10 });
+      tone({ f:N(45), f2:N(44), t:0, d:.42, g:.12, cut:700, det:10 });
+      tone({ f:N(40), f2:N(33), t:.45, d:.95, g:.17, cut:650, det:-10 });
+      tone({ f:N(40), f2:N(33), t:.45, d:.95, g:.13, cut:650, det:10 });
+      thump(0, 60, .5, .3); thump(.45, 55, .55, .45);
+    },
+    // mode ujian: bunyi "terkunci" netral (tidak membocorkan benar/salah)
+    lockIn(){
+      if(!ready()) return;
+      thump(0, 110, .35, .18);
+      tone({ f:N(69), t:.01, d:.16, type:"triangle", g:.07, cut:3000 });
+    },
+    // akhir kuis: fanfare panjang bila ≥75%, nada lembut menurun bila belum
+    final(pass){
+      if(!ready()) return;
+      if(pass){
+        const b = 60;
+        [b, b+4, b+7, b+12].forEach((n,k) => brass(N(n), k*.12, .2, .1));
+        [b+4, b+7, b+12, b+16].forEach(n => brass(N(n), .5, 1.8, .08));
+        [b+5, b+9, b+12, b+17].forEach(n => brass(N(n), 2.35, .35, .07));
+        [b+7, b+12, b+16, b+19, b+24].forEach(n => brass(N(n), 2.7, 2.2, .07));
+        thump(.5, 85, .5, .4); thump(2.7, 85, .55, .5);
+        noise({ t:.5, d:1.6, g:.08 }); noise({ t:2.7, d:2.4, g:.1 });
+      } else {
+        [[64,0],[62,.35],[60,.7]].forEach(([n,t]) => brass(N(n), t, .4, .08));
+        [57, 60, 64].forEach(n => brass(N(n), 1.05, 1.4, .06));
+      }
+    },
+    ping(){ if(!ready()) return; tone({ f:N(81), t:0, d:.18, type:"triangle", g:.08, cut:6000 }); }
+  };
+})();
+
+(function initSoundUI(){
+  const btn = $("#sndBtn"), lbl = $("#sndLbl");
+  const paint = () => { btn.setAttribute("aria-pressed", SND.isOn()); lbl.textContent = SND.isOn() ? "Suara on" : "Suara off"; };
+  btn.onclick = () => { SND.set(!SND.isOn()); paint(); SND.ping(); };
+  paint();
+  const tg = $("#setToggle"), box = $("#settingsBox");
+  tg.onclick = () => { const open = box.classList.toggle("collapsed") === false; tg.setAttribute("aria-expanded", open); };
+})();
+
+/* Pengaturan */
+let pending;
+document.querySelectorAll("#modeSeg button").forEach(b => b.onclick = () => { pending.mode = b.dataset.mode; renderSettings(); });
+document.querySelectorAll("#countSeg button").forEach(b => b.onclick = () => { pending.n = +b.dataset.n; renderSettings(); });
+document.querySelectorAll("#orderSeg button").forEach(b => b.onclick = () => { pending.shuffle = !!+b.dataset.sh; renderSettings(); });
+$("#btnStart").onclick = () => { S = build({...pending, topics:[...pending.topics]}); save(); renderQuestion();
+  $("#settingsBox").classList.add("collapsed"); $("#setToggle").setAttribute("aria-expanded", false); };
+
+document.addEventListener("keydown", e => {
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  if(!$("#main .card .opts")) return;
+  const k = e.key.toUpperCase();
+  const idx = "ABCD".indexOf(k) >= 0 ? "ABCD".indexOf(k) : "1234".indexOf(e.key);
+  if(idx >= 0 && k.length===1){ choose(idx); e.preventDefault(); }
+  else if(e.key==="ArrowRight"){ go(S.pos+1); e.preventDefault(); }
+  else if(e.key==="ArrowLeft"){ go(S.pos-1); e.preventDefault(); }
+});
+
+S = load() || build({ mode:"latihan", n:0, shuffle:false, topics:Object.keys(TOPICS) });
+pending = { ...S.cfg, topics:[...S.cfg.topics] };
+renderSettings();
+if(S.finished) renderResult(); else renderQuestion();
+</script>
