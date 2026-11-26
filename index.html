@@ -183,6 +183,44 @@ button{touch-action:manipulation}
   .actions .btn{flex:1 1 100%}
   .bytopic{font-size:.88rem}
 }
+/* ===== Panduan menghafal dokumen asesmen ===== */
+.guide{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px}
+.guide>summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px}
+.guide>summary::-webkit-details-marker{display:none}
+.guide>summary::after{content:"▾";color:var(--muted);transition:transform .2s}
+.guide[open]>summary::after{transform:rotate(180deg)}
+.guide>summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.guide .gt{font-family:var(--f-display);font-weight:800;font-size:1.08rem}
+.guide .gs{display:block;color:var(--muted);font-size:.85rem;font-weight:400;margin-top:2px}
+.guide .gbody{padding:0 16px 18px;display:flex;flex-direction:column;gap:16px;border-top:1px solid var(--line)}
+.guide h3{font-family:var(--f-display);font-weight:700;font-size:1rem;margin:14px 0 6px;display:flex;gap:8px;align-items:baseline}
+.guide h3 .st{font:700 .72rem var(--f-mono);color:var(--accent-ink);background:var(--accent);border-radius:4px;padding:2px 7px}
+.guide p{margin:0 0 6px}
+.guide .frame{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.guide .frame div{background:var(--sunk);border-radius:5px;padding:10px 8px;text-align:center}
+.guide .frame b{display:block;font-family:var(--f-display);font-size:1.6rem;line-height:1;color:var(--accent)}
+.guide .frame span{display:block;font-size:.78rem;font-weight:700;margin-top:4px}
+.guide .frame small{display:block;font-family:var(--f-mono);font-size:.7rem;color:var(--muted)}
+.guide .tip{border-left:3px solid var(--accent);background:var(--accent-soft);padding:9px 13px;border-radius:0 5px 5px 0;font-size:.95rem}
+.guide .mnemo{font-family:var(--f-display);font-weight:700;font-size:1.05rem;margin:4px 0 8px}
+.guide .mnemo u{text-decoration:none;color:var(--accent);font-size:1.2em}
+.guide table{width:100%;border-collapse:collapse;font-size:.93rem}
+.guide th,.guide td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.guide th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.guide td.c{font-family:var(--f-mono);font-weight:700;white-space:nowrap;color:var(--accent)}
+.guide ol.flow{margin:0;padding-left:1.3rem;display:flex;flex-direction:column;gap:4px}
+.guide .groups{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.guide .grp{border:1px solid var(--line);border-radius:5px;padding:10px 12px;background:var(--bg)}
+.guide .grp h4{margin:0 0 6px;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.guide .grp ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px;font-size:.92rem}
+.guide .grp code{font-family:var(--f-mono);font-weight:700;color:var(--accent);margin-right:4px}
+.guide .full{width:100%;font-size:.9rem}
+.guide .full td:first-child{font-family:var(--f-mono);color:var(--muted);width:2.5rem}
+.guide .full tr.sec td{background:var(--sunk);font-weight:700;font-family:var(--f-body);color:var(--ink);text-transform:uppercase;font-size:.75rem;letter-spacing:.06em}
+@media (max-width:560px){
+  .guide .frame{grid-template-columns:repeat(3,1fr)}
+  .guide .groups{grid-template-columns:1fr}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -238,6 +276,147 @@ button{touch-action:manipulation}
     </fieldset>
     <button type="button" class="btn accent apply" id="btnStart">Mulai ulang dengan pengaturan ini</button>
   </section>
+
+  <details class="guide" id="guide">
+    <summary><span><span class="gt">Panduan Menghafal 25 Dokumen Asesmen</span><span class="gs">APL, MAPA, AK, IA, VA dengan jembatan keledai dan alur cerita. Klik untuk membuka.</span></span></summary>
+    <div class="gbody">
+
+      <section>
+        <h3><span class="st">1</span>Hafalkan kerangkanya: 9 – 11 – 2 – 2 – 1</h3>
+        <div class="frame">
+          <div><b>9</b><span>A. Pelaksanaan</span><small>No. 1–9</small></div>
+          <div><b>11</b><span>Instrumen IA</span><small>No. 10–20</small></div>
+          <div><b>2</b><span>B. Keputusan</span><small>No. 21–22</small></div>
+          <div><b>2</b><span>C. Laporan</span><small>No. 23–24</small></div>
+          <div><b>1</b><span>D. Validasi</span><small>No. 25</small></div>
+        </div>
+        <p class="tip" style="margin-top:10px"><b>Trik nomor instrumen:</b> nomor urut = IA + 9. Contohnya IA.01 ada di nomor 10, IA.06 di nomor 15, dan IA.11 di nomor 20.</p>
+      </section>
+
+      <section>
+        <h3><span class="st">2</span>Bagian A: hafalkan sebagai alur cerita</h3>
+        <ol class="flow">
+          <li><b>Asesi mendaftar</b> → FR.APL.01 Permohonan Sertifikasi Kompetensi</li>
+          <li><b>Asesi menilai diri sendiri</b> → FR.APL.02 Asesmen Mandiri</li>
+          <li><b>Asesi membawa bukti</b> → Portofolio Asesi</li>
+          <li><b>Asesor merencanakan</b> → FR.MAPA.01, berdasarkan (5a) Skema Sertifikasi dan (5b) Standar Kompetensi</li>
+          <li><b>Asesor memetakan instrumen</b> → FR.MAPA.02 Peta Instrumen Asesmen</li>
+          <li><b>Ada kebutuhan khusus?</b> → FR.AK.07 Ceklis Penyesuaian yang Wajar</li>
+          <li><b>Kalau tidak setuju dengan hasil?</b> → FR.AK.04 Formulir Banding</li>
+          <li><b>Sepakat, tanda tangan</b> → FR.AK.01 Persetujuan Asesmen dan Kerahasiaan</li>
+        </ol>
+        <p class="tip" style="margin-top:10px">Urutan AK di bagian A adalah <b>07 → 04 → 01</b>. Ingat polanya: turun 3.</p>
+      </section>
+
+      <section>
+        <h3><span class="st">3</span>Kode AK.01–07</h3>
+        <p class="mnemo">"<u>S</u>api <u>R</u>ajin <u>U</u>ntuk <u>B</u>ajak <u>L</u>adang <u>T</u>iap <u>W</u>aktu"</p>
+        <table>
+          <thead><tr><th>Kode</th><th>Kata kunci</th><th>Ada di bagian</th></tr></thead>
+          <tbody>
+            <tr><td class="c">AK.01</td><td><b>S</b>etuju: Persetujuan Asesmen & Kerahasiaan</td><td>A. Pelaksanaan</td></tr>
+            <tr><td class="c">AK.02</td><td><b>R</b>ekaman Asesmen Kompetensi</td><td>B. Keputusan</td></tr>
+            <tr><td class="c">AK.03</td><td><b>U</b>mpan Balik & Catatan Asesmen</td><td>B. Keputusan</td></tr>
+            <tr><td class="c">AK.04</td><td><b>B</b>anding</td><td>A. Pelaksanaan</td></tr>
+            <tr><td class="c">AK.05</td><td><b>L</b>aporan Asesmen</td><td>C. Laporan</td></tr>
+            <tr><td class="c">AK.06</td><td><b>T</b>injau Proses Asesmen</td><td>C. Laporan</td></tr>
+            <tr><td class="c">AK.07</td><td>Penyesuaian yang <b>W</b>ajar</td><td>A. Pelaksanaan</td></tr>
+          </tbody>
+        </table>
+        <p class="tip" style="margin-top:10px">Keputusan = <b>02, 03</b>. Laporan = <b>05, 06</b>. Nomornya berurutan; sisanya (01, 04, 07) masuk bagian A.</p>
+      </section>
+
+      <section>
+        <h3><span class="st">4</span>Instrumen IA.01–11: tiga kelompok</h3>
+        <div class="groups">
+          <div class="grp">
+            <h4>Asesor melihat langsung</h4>
+            <ul>
+              <li><code>01</code>Observasi (CL)</li>
+              <li><code>02</code>Tugas Praktik Demonstrasi (TPD)</li>
+              <li><code>03</code>Pertanyaan Mendukung Observasi (PMO)</li>
+              <li><code>04</code>Proyek Singkat (DIT), bagian A dan B</li>
+            </ul>
+          </div>
+          <div class="grp">
+            <h4>Pertanyaan: tulis → lisan</h4>
+            <ul>
+              <li><code>05</code>Pilihan Ganda (DPT), bagian A/B/C</li>
+              <li><code>06</code>Esai, bagian A/B/C</li>
+              <li><code>07</code>Pertanyaan Lisan (DPL)</li>
+            </ul>
+            <p style="font-size:.82rem;color:var(--muted);margin:6px 0 0">A = soal, B = kunci jawaban, C = lembar jawab</p>
+          </div>
+          <div class="grp">
+            <h4>Bukti tidak langsung</h4>
+            <p class="mnemo" style="font-size:.95rem;margin:0 0 6px">"<u>P</u>ak <u>Wawan</u> <u>P</u>injam <u>Produk</u>"</p>
+            <ul>
+              <li><code>08</code><b>P</b>ortofolio (CVP)</li>
+              <li><code>09</code><b>Wawan</b>cara (PW)</li>
+              <li><code>10</code><b>P</b>ihak Ketiga (VPK)</li>
+              <li><code>11</code>Reviu <b>Produk</b> (CRP)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3><span class="st">5</span>Penutup: putuskan → laporkan → validasi</h3>
+        <p>Setelah asesmen, asesor <b>memutuskan</b> (AK.02 rekaman, AK.03 umpan balik), lalu <b>melapor</b> (AK.05 laporan, AK.06 meninjau proses), lalu ikut <b>validasi</b> (FR.VA).</p>
+      </section>
+
+      <section>
+        <h3><span class="st">6</span>Daftar lengkap untuk dicocokkan</h3>
+        <div class="tablewrap">
+        <table class="full">
+          <tbody>
+            <tr class="sec"><td></td><td>A. Pelaksanaan Asesmen</td></tr>
+            <tr><td>1</td><td>FR.APL.01 Permohonan Sertifikasi Kompetensi</td></tr>
+            <tr><td>2</td><td>FR.APL.02 Asesmen Mandiri</td></tr>
+            <tr><td>3</td><td>Portofolio Asesi</td></tr>
+            <tr><td>4</td><td>FR.MAPA.01 Merencanakan Aktivitas dan Proses Asesmen</td></tr>
+            <tr><td>5</td><td>a. Skema Sertifikasi · b. Standar Kompetensi</td></tr>
+            <tr><td>6</td><td>FR.MAPA.02 Peta Instrumen Asesmen Hasil Pendekatan Asesmen dan Perencanaan Asesmen</td></tr>
+            <tr><td>7</td><td>FR.AK.07 Ceklis Penyesuaian yang Wajar</td></tr>
+            <tr><td>8</td><td>FR.AK.04 Formulir Banding</td></tr>
+            <tr><td>9</td><td>FR.AK.01 Persetujuan Asesmen dan Kerahasiaan</td></tr>
+            <tr class="sec"><td></td><td>Instrumen Asesmen (sesuai MAPA-01/MAPA-02)</td></tr>
+            <tr><td>10</td><td>FR.IA.01.CL Ceklis Observasi Aktivitas di Tempat Kerja atau Tempat Kerja Simulasi</td></tr>
+            <tr><td>11</td><td>FR.IA.02 TPD Tugas Praktik Demonstrasi</td></tr>
+            <tr><td>12</td><td>FR.IA.03 PMO Pertanyaan untuk Mendukung Observasi</td></tr>
+            <tr><td>13</td><td>FR.IA.04A DIT Daftar Instruksi Terstruktur · FR.IA.04B Penilaian Proyek Singkat atau Kegiatan Terstruktur Lainnya</td></tr>
+            <tr><td>14</td><td>FR.IA.05 A DPT Pertanyaan Tertulis Pilihan Ganda · B Kunci Jawaban · C Lembar Jawaban</td></tr>
+            <tr><td>15</td><td>FR.IA.06 A DPT Pertanyaan Tertulis Esai · B Kunci Jawaban · C Lembar Jawab</td></tr>
+            <tr><td>16</td><td>FR.IA.07 DPL Pertanyaan Lisan</td></tr>
+            <tr><td>17</td><td>FR.IA.08 CVP Ceklis Verifikasi Portofolio</td></tr>
+            <tr><td>18</td><td>FR.IA.09 PW Pertanyaan Wawancara</td></tr>
+            <tr><td>19</td><td>FR.IA.10 VPK Verifikasi Pihak Ketiga</td></tr>
+            <tr><td>20</td><td>FR.IA.11 CRP Ceklis Reviu Produk</td></tr>
+            <tr class="sec"><td></td><td>B. Keputusan</td></tr>
+            <tr><td>21</td><td>FR.AK.02 Rekaman Asesmen Kompetensi</td></tr>
+            <tr><td>22</td><td>FR.AK.03 Umpan Balik dan Catatan Asesmen</td></tr>
+            <tr class="sec"><td></td><td>C. Laporan Asesmen</td></tr>
+            <tr><td>23</td><td>FR.AK.05 Laporan Asesmen</td></tr>
+            <tr><td>24</td><td>FR.AK.06 Meninjau Proses Asesmen</td></tr>
+            <tr class="sec"><td></td><td>D. Validasi</td></tr>
+            <tr><td>25</td><td>FR.VA Memberikan Kontribusi dalam Validasi Asesmen</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+      <section>
+        <h3><span class="st">7</span>Cara latihan</h3>
+        <ul style="margin:0;padding-left:1.2rem">
+          <li><b>Tulis ulang dari ingatan</b> setiap hari: kerangka 9-11-2-2-1 dulu, baru isinya. Cocokkan dengan tabel di atas.</li>
+          <li><b>Kartu bolak-balik:</b> kode di satu sisi, nama di sisi lain (misalnya "AK.04" ↔ "Banding"), urutan diacak.</li>
+          <li><b>Ceritakan alurnya dengan suara keras</b>, seolah Anda asesor yang memandu asesi dari pendaftaran sampai laporan.</li>
+          <li>Kerjakan kuis di bawah dengan materi <b>MAPA</b> dan <b>Instrumen Asesmen</b> untuk menguji hafalan.</li>
+        </ul>
+      </section>
+
+    </div>
+  </details>
 
   <div class="progress" aria-hidden="true"><i id="prog"></i></div>
 
